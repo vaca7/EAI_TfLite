@@ -21,7 +21,6 @@ limitations under the License.
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
 #include "tensorflow/lite/optional_debug_tools.h"
-
 #include "headers/edgetpu_c.h"
 
 // This is an example that is minimal to read a model
@@ -36,8 +35,8 @@ limitations under the License.
 
 using namespace std;
 
-#define MNIST_INPUT "/home/pi/EAI_TfLite/mnist_dataset/mnist_images"
-#define MNIST_LABEL "/home/pi/EAI_TfLite/mnist_dataset/mnist_labels"
+#define MNIST_INPUT "/home/nayeon/EAI_TfLite/mnist_dataset/mnist_images"
+#define MNIST_LABEL "/home/nayeon/EAI_TfLite/mnist_dataset/mnist_labels"
 
 #define TFLITE_MINIMAL_CHECK(x)                              \
   if (!(x)) {                                                \
@@ -45,6 +44,7 @@ using namespace std;
     exit(1);                                                 \
   }
 
+ 
 int ReverseInt(int i)
 {
 	unsigned char ch1, ch2, ch3, ch4;
@@ -55,21 +55,30 @@ int ReverseInt(int i)
 	return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 }
 
+
 void read_Mnist(string filename, vector<vector<float>>& input_vec) {
 	ifstream file(filename, ios::binary);
 	if (file.is_open()){
-		int magic_number = 0;
+		int magic_number = 0; 
 		int number_of_images = 0;
 		int n_rows = 0;
 		int n_cols = 0;
+
+
 		file.read((char*)& magic_number, sizeof(magic_number));
 		magic_number = ReverseInt(magic_number);
+
 		file.read((char*)& number_of_images, sizeof(number_of_images));
 		number_of_images = ReverseInt(number_of_images);
+
     file.read((char*)& n_rows, sizeof(n_rows));
 		n_rows = ReverseInt(n_rows);
+
 		file.read((char*)& n_cols, sizeof(n_cols));
 		n_cols = ReverseInt(n_cols);
+
+
+
 		for (int i = 0; i < 1; ++i){
 			for (int r = 0; r < n_rows; ++r){
         input_vec.push_back(vector<float>());
@@ -85,6 +94,7 @@ void read_Mnist(string filename, vector<vector<float>>& input_vec) {
 		cout << "file open failed" << endl;
 	}
 }
+
 
 void read_Mnist_Label(string filename, vector<unsigned char> &arr) {
 	ifstream file(filename, ios::binary);
@@ -112,6 +122,7 @@ int main(int argc, char* argv[]) {
   // Load mnist input images
   vector<vector<float>> input_vector;
   read_Mnist(MNIST_INPUT, input_vector);
+
   std::cout << "Input MNIST Image" << "\n";
   for(int i=0; i<28; ++i){
     for(int j=0; j<28; ++j){
@@ -120,7 +131,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
   }
 
-  // Load model
+
   std::unique_ptr<tflite::FlatBufferModel> model =
       tflite::FlatBufferModel::BuildFromFile(filename);
   TFLITE_MINIMAL_CHECK(model != nullptr);
@@ -130,18 +141,21 @@ int main(int argc, char* argv[]) {
   // Note: all Interpreters should be built with the InterpreterBuilder,
   // which allocates memory for the Intrepter and does various set up
   // tasks so that the Interpreter can read the provided model.
-  tflite::ops::builtin::BuiltinOpResolver resolver;
-  tflite::InterpreterBuilder builder(*model, resolver);
+
+  tflite::ops::builtin::BuiltinOpResolver resolver; 
+  tflite::InterpreterBuilder builder(*model, resolver); 
   std::unique_ptr<tflite::Interpreter> interpreter;
   builder(&interpreter);
   TFLITE_MINIMAL_CHECK(interpreter != nullptr);
 
+
   // Setup for Edge TPU device.
   size_t num_devices;
+
   std::unique_ptr<edgetpu_device, decltype(&edgetpu_free_devices)> devices(
       edgetpu_list_devices(&num_devices), &edgetpu_free_devices);
-
   assert(num_devices > 0);
+
   const auto& device = devices.get()[0];
 
   // Create TPU delegate.
@@ -160,14 +174,14 @@ int main(int argc, char* argv[]) {
   // TODO(user): Insert code to fill input tensors.
   // Note: The buffer of the input tensor with index `i` of type T can
   // be accessed with `T* input = interpreter->typed_input_tensor<T>(i);`
+
   auto input_tensor = interpreter->typed_input_tensor<float>(0);
   for(int i=0; i<28; ++i) // image rows
     for(int j=0; j<28; ++j) // image cols
       input_tensor[i * 28 + j] = input_vector[i][j] / 255.0; // normalize and copy input values.
   
-
   // Run inference
-  TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
+  TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk); 
   printf("\n\n=== Post-invoke Interpreter State ===\n");
   tflite::PrintInterpreterState(interpreter.get());
 
@@ -175,9 +189,11 @@ int main(int argc, char* argv[]) {
   // TODO(user): Insert getting data out code.
   // Note: The buffer of the output tensor with index `i` of type T can
   // be accessed with `T* output = interpreter->typed_output_tensor<T>(i);`
+
   auto output_tensor = interpreter->typed_output_tensor<float>(0);
+
   for(int i=0; i<10; ++i)
-    printf("label : %d %.3f% \n", i, output_tensor[i] * 100);
+    printf("label : %d %.3f% \n", i, output_tensor[i] * 100); //ex. label : 0 12.345%
 
   
   return 0;
