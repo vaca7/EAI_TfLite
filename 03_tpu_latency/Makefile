@@ -6,7 +6,7 @@ LDFLAGS := -pthread -ltensorflow-lite -lflatbuffers -l:libedgetpu.so.1.0 -ldl\
 					 
 LDPATH := -L${HOME}/tensorflow/tensorflow/lite/tools/make/gen/bbb_armv7l/lib\
 	  -L${HOME}/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build\
-		-L${HOME}/EAI/libs/armv7a
+		-L${HOME}/EAI_TfLite/libs/armv7a
 
 SRCS := tpu_latency.cc
 OBJS := $(SRCS:.cc=.o)
