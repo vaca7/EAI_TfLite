@@ -35,9 +35,9 @@ using namespace cv;
 
 
 // MAKE SURE TO USE PROPER DIRECTORIES
-#define IMAGENET_BANANA "/home/nayeon/EAI/imagenet_dataset/banana.jpg"
-#define IMAGENET_ORANGE "/home/nayeon/EAI/imagenet_dataset/orange.jpg"
-#define IMAGENET_LABELS "/home/nayeon/EAI/imagenet_dataset/imagenet_label.txt"
+#define IMAGENET_BANANA "/home/nayeon/EAI_TfLite/imagenet_dataset/banana.jpg"
+#define IMAGENET_ORANGE "/home/nayeon/EAI_TfLite/imagenet_dataset/orange.jpg"
+#define IMAGENET_LABELS "/home/nayeon/EAI_TfLite/imagenet_dataset/imagenet_label.txt"
 
 #define TFLITE_MINIMAL_CHECK(x)                              \
   if (!(x)) {                                                \
